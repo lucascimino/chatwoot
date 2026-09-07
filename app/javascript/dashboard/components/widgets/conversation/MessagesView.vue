@@ -548,7 +548,17 @@ export default {
           />
         </div>
       </div>
+      <a
+        v-if="currentChat.desk_read_only"
+        :href="`https://chat.lkskrs.online/app/accounts/1/conversations/${currentChat.id}`"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="p-4 text-n-teal-11"
+      >
+        {{ $t('CONVERSATION.DESK_SOURCE_READ_ONLY') }}
+      </a>
       <ResizableEditorWrapper
+        v-else
         ref="resizableEditorWrapperRef"
         :container-height="Math.max(0, containerHeight - topBannerHeight)"
       >

@@ -401,7 +401,8 @@
       "UNMUTE": "Unmute mic",
       "VIEW_CHAT_HISTORY": "View chat history",
       "GO_TO_CONVERSATION": "Go to conversation thread"
-    }
+    },
+    "DESK_SOURCE_READ_ONLY": "Read-only source. Open Chatwoot to reply."
   },
   "EMAIL_TRANSCRIPT": {
     "TITLE": "Send conversation transcript",

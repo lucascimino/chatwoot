@@ -3,6 +3,7 @@ class Api::V1::Accounts::BaseController < Api::BaseController
   include EnsureCurrentAccountHelper
   before_action :current_account
   before_action :validate_token_api_access, if: :authenticate_by_access_token?
+  include DeskChatwootSourceConcern
   around_action :switch_locale_using_account_locale
 
   private
