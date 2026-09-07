@@ -1,4 +1,5 @@
 <script setup>
+import { messengerEnabled } from 'dashboard/components-next/messenger/messenger';
 import { ref, unref, provide, computed, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -72,8 +73,16 @@ const store = useStore();
 
 const resolveAttributesModalRef = ref(null);
 
-const activeAssigneeTab = ref(wootConstants.ASSIGNEE_TYPE.ME);
-const activeStatus = ref(wootConstants.STATUS_TYPE.OPEN);
+const activeAssigneeTab = ref(
+  messengerEnabled
+    ? wootConstants.ASSIGNEE_TYPE.ALL
+    : wootConstants.ASSIGNEE_TYPE.ME
+);
+const activeStatus = ref(
+  messengerEnabled
+    ? wootConstants.STATUS_TYPE.ALL
+    : wootConstants.STATUS_TYPE.OPEN
+);
 const activeSortBy = ref(wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC);
 const showAdvancedFilters = ref(false);
 // chatsOnView is to store the chats that are currently visible on the screen,
@@ -381,7 +390,9 @@ const uniqueInboxes = computed(() => {
 function setFiltersFromUISettings() {
   const { conversations_filter_by: filterBy = {} } = uiSettings.value;
   const { status, order_by: orderBy } = filterBy;
-  activeStatus.value = status || wootConstants.STATUS_TYPE.OPEN;
+  activeStatus.value = messengerEnabled
+    ? wootConstants.STATUS_TYPE.ALL
+    : status || wootConstants.STATUS_TYPE.OPEN;
   activeSortBy.value = Object.values(wootConstants.SORT_BY_TYPE).includes(
     orderBy
   )
@@ -895,7 +906,19 @@ watch(conversationFilters, (newVal, oldVal) => {
     ]"
   >
     <slot />
+    <div v-if="messengerEnabled" class="px-4 py-4 border-b border-n-weak">
+      <h1 class="text-base font-semibold truncate">{{ pageTitle }}</h1>
+      <RouterLink
+        :to="{ name: 'search' }"
+        class="mt-3 flex items-center gap-2 rounded-lg bg-n-slate-3 px-3 py-2 text-sm text-n-slate-11"
+      >
+        <span class="i-lucide-search size-4" />{{
+          $t('COMBOBOX.SEARCH_PLACEHOLDER')
+        }}
+      </RouterLink>
+    </div>
     <ChatListHeader
+      v-else
       :page-title="pageTitle"
       :has-applied-filters="hasAppliedFilters"
       :has-active-folders="hasActiveFolders"
@@ -932,7 +955,7 @@ watch(conversationFilters, (newVal, oldVal) => {
     />
 
     <ChatTypeTabs
-      v-if="!hasAppliedFiltersOrActiveFolders"
+      v-if="!messengerEnabled && !hasAppliedFiltersOrActiveFolders"
       :items="assigneeTabItems"
       :active-tab="activeAssigneeTab"
       is-compact

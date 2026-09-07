@@ -1,6 +1,12 @@
 <script>
 import { defineAsyncComponent, ref, computed } from 'vue';
 
+import MessengerRail from 'dashboard/components-next/messenger/MessengerRail.vue';
+import {
+  messengerEnabled,
+  messengerRoutes,
+} from 'dashboard/components-next/messenger/messenger';
+
 import NextSidebar from 'next/sidebar/Sidebar.vue';
 import WootKeyShortcutModal from 'dashboard/components/widgets/modal/WootKeyShortcutModal.vue';
 import AddAccountModal from 'dashboard/components/app/AddAccountModal.vue';
@@ -30,6 +36,7 @@ import { useCallsStore } from 'dashboard/stores/calls';
 export default {
   components: {
     NextSidebar,
+    MessengerRail,
     CommandBar,
     WootKeyShortcutModal,
     AddAccountModal,
@@ -65,6 +72,9 @@ export default {
     };
   },
   computed: {
+    isMessenger() {
+      return messengerEnabled && messengerRoutes.has(this.$route.name);
+    },
     isSmallScreen() {
       return this.windowWidth < wootConstants.SMALL_SCREEN_BREAKPOINT;
     },
@@ -130,7 +140,9 @@ export default {
 
 <template>
   <div class="flex flex-grow overflow-hidden text-n-slate-12">
+    <MessengerRail v-if="isMessenger" />
     <NextSidebar
+      v-show="!isMessenger"
       :is-mobile-sidebar-open="isMobileSidebarOpen"
       @toggle-account-modal="toggleAccountModal"
       @open-key-shortcut-modal="toggleKeyShortcutModal"
@@ -148,18 +160,20 @@ export default {
         :bypass-upgrade-page="bypassUpgradePage"
       >
         <MobileSidebarLauncher
+          v-if="!isMessenger"
           :is-mobile-sidebar-open="isMobileSidebarOpen"
           @toggle="toggleMobileSidebar"
         />
       </UpgradePage>
       <template v-if="!showUpgradePage">
         <router-view />
-        <CopilotLauncher />
+        <CopilotLauncher v-if="!isMessenger" />
         <MobileSidebarLauncher
+          v-if="!isMessenger"
           :is-mobile-sidebar-open="isMobileSidebarOpen"
           @toggle="toggleMobileSidebar"
         />
-        <CopilotContainer />
+        <CopilotContainer v-if="!isMessenger" />
         <FloatingCallWidget v-if="hasActiveCall || hasIncomingCall" />
       </template>
       <CommandBar :is-paywalled="isAccountPaywalled" />

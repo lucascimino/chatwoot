@@ -1,4 +1,5 @@
 <script setup>
+import { messengerEnabled } from 'dashboard/components-next/messenger/messenger';
 import { computed, onUnmounted } from 'vue';
 import { useToggle } from '@vueuse/core';
 import { useStore } from 'vuex';
@@ -93,6 +94,7 @@ onUnmounted(() => {
 <template>
   <div class="relative flex items-center gap-2 actions--container">
     <ResolveAction
+      v-if="!messengerEnabled"
       :conversation-id="currentChat.id"
       :status="currentChat.status"
     />

@@ -1,4 +1,5 @@
 <script setup>
+import { messengerEnabled } from 'dashboard/components-next/messenger/messenger';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -147,13 +148,14 @@ const copyConversationId = async () => {
           class="flex items-center gap-1 overflow-hidden text-xs conversation--header--actions text-n-slate-11 text-ellipsis whitespace-nowrap"
         >
           <button
+            v-if="!messengerEnabled"
             type="button"
             class="truncate text-label-small text-n-slate-11 hover:text-n-slate-12 !p-0 cucursor-pointer"
             @click="copyConversationId"
           >
             {{ `#${chat.id}` }}
           </button>
-          <span v-if="hasMultipleInboxes">•</span>
+          <span v-if="hasMultipleInboxes && !messengerEnabled">•</span>
           <InboxName v-if="hasMultipleInboxes" :inbox="inbox" class="!mx-0" />
           <span v-if="isSnoozed">•</span>
           <span v-if="isSnoozed" class="font-medium text-n-amber-10">
