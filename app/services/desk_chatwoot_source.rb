@@ -152,7 +152,10 @@ class DeskChatwootSource
   def adapt_hash(value)
     value.reject { |key, _| key.match?(/token|password|secret|api_key|webhook_url/i) }.transform_values { |item| adapt(item) }.tap do |item|
       item['account_id'] = @local_account_id if item['account_id'] == 1
-      item['desk_read_only'] = true if item.key?('inbox_id') || item.key?('channel_type')
+      if item.key?('inbox_id') || item.key?('channel_type')
+        item['desk_source'] = true
+        item['desk_read_only'] = ENV['DESK_LK_SOURCE_SEND_ENABLED'] != 'true'
+      end
     end
   end
 
