@@ -1,6 +1,6 @@
 # Messenger preview
 
-Fork based on Chatwoot Community v4.17.1. Build with `VITE_DESK_LAYOUT=messenger` to enable the compact inbox rail, native account switcher, Command+1..9 and Command+Option+arrows. Without the flag the standard UI remains available.
+Fork based on Chatwoot Community v4.17.1. Build with `VITE_DESK_LAYOUT=messenger` to enable the compact inbox rail, native account switcher, Command+1..9 and Command+Option+arrows. Without the flag the standard UI remains available. Set the optional build argument `VITE_DESK_HOST=chat.lucascimino.com` to enable Messenger only on that exact hostname; other hosts keep the standard UI. This is presentation selection, not an authorization boundary. Docker builds must pass both build arguments.
 
 Use the upstream Ruby version and pnpm 10. `VITE_DESK_LAYOUT=messenger pnpm exec vite build` builds the actual dashboard. `pnpm exec vitest run app/javascript/dashboard/components-next/messenger/MessengerRail.spec.js` verifies inbox switching clears the selected conversation.
 
