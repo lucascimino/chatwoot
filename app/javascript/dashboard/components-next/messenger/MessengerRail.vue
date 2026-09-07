@@ -3,7 +3,8 @@ import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useEventListener } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
-import { useMapGetter } from 'dashboard/composables/store';
+import { useSourcePolling } from './useSourcePolling';
+import { useMapGetter, useStore } from 'dashboard/composables/store';
 import SidebarAccountSwitcher from 'dashboard/components-next/sidebar/SidebarAccountSwitcher.vue';
 import { useAccount } from 'dashboard/composables/useAccount';
 
@@ -12,6 +13,7 @@ const route = useRoute();
 const router = useRouter();
 const { accountId } = useAccount();
 const inboxes = useMapGetter('inboxes/getInboxes');
+useSourcePolling(useStore(), route, inboxes);
 const unread = useMapGetter('conversationUnreadCounts/getInboxUnreadCount');
 const orderedInboxes = computed(() =>
   [...inboxes.value].sort((a, b) => a.id - b.id)

@@ -3,11 +3,13 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import { ref } from 'vue';
 import MessengerRail from './MessengerRail.vue';
 
+vi.mock('./useSourcePolling', () => ({ useSourcePolling: vi.fn() }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/composables/useAccount', () => ({
   useAccount: () => ({ accountId: ref(1) }),
 }));
 vi.mock('dashboard/composables/store', () => ({
+  useStore: () => ({}),
   useMapGetter: key =>
     ref(
       key.includes('Unread')
