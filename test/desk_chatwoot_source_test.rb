@@ -19,7 +19,7 @@ class DeskChatwootSourceTest < Minitest::Test
   end
 
   def test_inbox_scope_and_query_override
-    assert_not @source.read('inboxes')['payload'].first.key?('hmac_token')
+    assert_equal false, @source.read('inboxes')['payload'].first.key?('hmac_token')
     assert_equal([3], @source.read('inboxes')['payload'].map { |i| i['id'] })
     @source.read('conversations', { 'inbox_id' => '2', 'account_id' => '9', 'page' => '2' })
     assert_equal({ 'inbox_id' => '3', 'page' => '2' }, @calls.last[1])
@@ -38,10 +38,10 @@ class DeskChatwootSourceTest < Minitest::Test
     ENV['DESK_LK_SOURCE_SEND_ENABLED'] = 'true'
     inbox = @source.read('inboxes')['payload'].first
     assert inbox['desk_source']
-    assert_not inbox['desk_read_only']
+    assert_equal false, inbox['desk_read_only']
     conversation = @source.read('conversations/10')
     assert conversation['desk_source']
-    assert_not conversation['desk_read_only']
+    assert_equal false, conversation['desk_read_only']
   ensure
     ENV['DESK_LK_SOURCE_SEND_ENABLED'] = previous
   end
