@@ -12,24 +12,27 @@ class DeskChatwootSource
   def read(path, query = {})
     raise Denied unless path.match?(%r{\A(?:inboxes(?:/3)?|conversations(?:/(?:search|meta|\d+(?:/(?:messages|attachments|labels))?))?)\z})
 
-    if path.start_with?('conversations/') && (id = path.split('/')[1]).match?(/\A\d+\z/)
-      conversation = get("conversations/#{id}")
-      raise Denied unless conversation['inbox_id'] == 3
-      return adapt(conversation) if path == "conversations/#{id}"
-    end
+    conversation = scoped_conversation(path)
+    return adapt(conversation) if conversation && path.match?(%r{\Aconversations/\d+\z})
 
     allowed = query.slice('page', 'before', 'after', 'q', 'status', 'assignee_type', 'sort_by')
     allowed['inbox_id'] = '3' if %w[conversations conversations/search conversations/meta].include?(path)
     result = get(path, allowed)
-    if path == 'inboxes'
-      result['payload'] = result.fetch('payload').select { |inbox| inbox['id'] == 3 }.map { |inbox| public_inbox(inbox) }
-    elsif path == 'inboxes/3'
-      result = public_inbox(result)
-    end
+    result = filter_inbox_response(path, result)
     adapt(result)
   end
 
   private
+
+  def scoped_conversation(path)
+    id = path[%r{\Aconversations/(\d+)(?:/|\z)}, 1]
+    return unless id
+
+    conversation = get("conversations/#{id}")
+    raise Denied unless conversation['inbox_id'] == 3
+
+    conversation
+  end
 
   def get(path, query = {})
     uri = URI("https://chat.lkskrs.online/api/v1/accounts/1/#{path}")
@@ -47,18 +50,31 @@ class DeskChatwootSource
     raise Unavailable
   end
 
+  def filter_inbox_response(path, result)
+    case path
+    when 'inboxes'
+      result['payload'] = result.fetch('payload').select { |inbox| inbox['id'] == 3 }.map { |inbox| public_inbox(inbox) }
+      result
+    when 'inboxes/3' then public_inbox(result)
+    else result
+    end
+  end
+
   def public_inbox(inbox)
     inbox.slice('id', 'name', 'avatar_url', 'channel_type', 'channel_id', 'phone_number', 'allow_messages_after_resolved')
+  end
+
+  def adapt_hash(value)
+    value.reject { |key, _| key.match?(/token|password|secret|api_key|webhook_url/i) }.transform_values { |item| adapt(item) }.tap do |item|
+      item['account_id'] = @local_account_id if item['account_id'] == 1
+      item['desk_read_only'] = true if item.key?('inbox_id') || item.key?('channel_type')
+    end
   end
 
   def adapt(value)
     case value
     when Array then value.map { |item| adapt(item) }
-    when Hash
-      value.reject { |key, _| key.match?(/token|password|secret|api_key|webhook_url/i) }.transform_values { |item| adapt(item) }.tap do |item|
-        item['account_id'] = @local_account_id if item['account_id'] == 1
-        item['desk_read_only'] = true if item.key?('inbox_id') || item.key?('channel_type')
-      end
+    when Hash then adapt_hash(value)
     else value
     end
   end

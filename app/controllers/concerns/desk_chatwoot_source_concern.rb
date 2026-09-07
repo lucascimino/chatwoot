@@ -15,6 +15,10 @@ module DeskChatwootSourceConcern
     path = request.path.delete_prefix("/api/v1/accounts/#{Current.account.id}/")
     return if path.match?(%r{\A(?:labels|teams|agents|custom_attribute_definitions|custom_filters|canned_responses|notifications)(?:/|\z)})
 
+    render_desk_source(path)
+  end
+
+  def render_desk_source(path)
     response.headers['Cache-Control'] = 'no-store'
     render json: DeskChatwootSource.new(Current.account.id).read(path, request.query_parameters)
   rescue DeskChatwootSource::Denied
